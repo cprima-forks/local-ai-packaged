@@ -3,21 +3,38 @@
     email {$LETSENCRYPT_EMAIL}
 }
 
+(dns01-inwx) {
+    tls {
+        dns inwx {
+            username prior
+            password {$CADDY_ACME_INWX_PASSWORD}
+        }
+    }
+}
+
 # N8N
 {$N8N_HOSTNAME} {
     # For domains, Caddy will automatically use Let's Encrypt
     # For localhost/port addresses, HTTPS won't be enabled
     reverse_proxy localhost:5678
+    tls {
+        dns inwx {
+            username prior
+            password {$CADDY_ACME_INWX_PASSWORD}
+        }
+    }
 }
 
 # Open WebUI
 {$WEBUI_HOSTNAME} {
     reverse_proxy localhost:3000
+    import dns01-inwx
 }
 
 # Flowise
 {$FLOWISE_HOSTNAME} {
     reverse_proxy localhost:3001
+    import dns01-inwx
 }
 
 # Langfuse
@@ -28,15 +45,18 @@
 # Ollama API
 {$OLLAMA_HOSTNAME} {
     reverse_proxy localhost:11434
+    import dns01-inwx
 }
 
 # Supabase
 {$SUPABASE_HOSTNAME} {
     reverse_proxy localhost:8000
+    import dns01-inwx
 }
 
 # SearXNG
 {$SEARXNG_HOSTNAME} {
+    import dns01-inwx
     encode zstd gzip
     
     @api {

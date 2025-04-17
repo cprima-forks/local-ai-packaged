@@ -112,7 +112,10 @@ services:
 
   caddy:
     container_name: caddy
-    image: docker.io/library/caddy:2-alpine
+    #image: docker.io/library/caddy:2-alpine
+    build:
+      context: .
+      dockerfile: caddy.Dockerfile
     network_mode: host
     restart: unless-stopped
     volumes:
@@ -128,6 +131,7 @@ services:
       - SEARXNG_HOSTNAME=${SEARXNG_HOSTNAME:-":8006"}
       - LANGFUSE_HOSTNAME=${LANGFUSE_HOSTNAME:-":8007"}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-internal}
+      - CADDY_ACME_INWX_PASSWORD=${CADDY_ACME_INWX_PASSWORD}
     cap_drop:
       - ALL
     cap_add:
