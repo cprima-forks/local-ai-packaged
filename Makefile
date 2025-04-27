@@ -8,19 +8,21 @@ PROFILE ?= gpu-nvidia
 COMPOSE_FILES = -f docker-compose.yml -f supabase/docker/docker-compose.yml
 PROJECT = localai
 
-.PHONY: help up down pull restart supabase localai logs sync
+.PHONY: help up down pull restart supabase localai logs sync pull-model
 
 help: ## Show this help message
 	@echo "Self-Hosted AI Makefile Commands:"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make <target> [PROFILE=cpu|gpu-nvidia|gpu-amd|none]"
+	@echo "  make <target> [PROFILE=cpu|gpu-nvidia|gpu-amd|none] [MODEL=model-name]"
 	@echo ""
 	@echo "Targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 	@echo ""
-	@echo "Example:"
-	@echo "  make up PROFILE=gpu-nvidia"
+	@echo "Examples:"
+	@echo "  make up PROFILE=gpu-nvidia          # Start services with NVIDIA GPU profile"
+	@echo "  make update PROFILE=cpu             # Pull latest images and restart everything"
+	@echo "  make pull-model MODEL=llama3        # Pull a new Ollama model inside running container"
 
 up: ## Start all services (Supabase + Local AI)
 	$(PYTHON) start_services.py --profile $(PROFILE)
@@ -70,4 +72,11 @@ sync:
 	git rebase main; \
 	echo "🎯 Done! Branch $$branch is now rebased on latest main."
 
+
+pull-model: ## Pull a specific model using the running Ollama container
+	@if [ -z "$(MODEL)" ]; then \
+		echo "❌ Error: No MODEL specified. Usage: make pull-model MODEL=llama3"; \
+		exit 1; \
+	fi
+	docker exec -it ollama ollama pull $(MODEL)
 
